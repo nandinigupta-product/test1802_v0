@@ -333,7 +333,7 @@
 
               <div id="savings-banner" class="hidden flex items-center gap-2 bg-green-50 border border-green-200 rounded-md px-3 py-2" data-testid="savings-banner">
                 ${svgIcon('trendingDown', 'w-4 h-4 text-green-600 flex-shrink-0')}
-                <span class="text-xs text-green-700 font-medium">You save upto <span class="font-bold" id="savings-text">₹0</span> vs banks & airports</span>
+                <span class="text-xs text-green-700 font-medium">You save upto <span class="font-bold" id="savings-text">₹0</span> vs other banks & airports</span>
               </div>
 
               <div class="space-y-2">
