@@ -2,7 +2,6 @@
   Forex Widget - Static replica
   - No backend calls
   - Loads data from ./data/cities.json, ./data/currencies.json, ./data/rates.json
-  - Replicates the Replit UI structure closely using the same Tailwind CSS output
 */
 
 (function () {
@@ -30,10 +29,6 @@
     return { display: full, full };
   }
 
-  function pad2(n) {
-    return String(n).padStart(2, '0');
-  }
-
   function hashCode(str) {
     let h = 0;
     for (let i = 0; i < str.length; i++) {
@@ -50,7 +45,6 @@
   }
 
   function nextDeliveryDate(now) {
-    // basic weekend handling: if Sat after cutoff, deliver Monday; if Sun, deliver Monday.
     const cutoffHour = 13;
     const day = now.getDay(); // 0 Sun .. 6 Sat
     const beforeCutoff = now.getHours() < cutoffHour;
@@ -72,7 +66,7 @@
   function getDeliveryTatText() {
     const now = new Date();
     const info = nextDeliveryDate(now);
-    // Mobile: keep it shorter to avoid collision with the city selector
+
     const isMobile = (typeof window !== 'undefined') && window.matchMedia && window.matchMedia('(max-width: 639px)').matches;
     const formatted = info.date.toLocaleDateString(
       'en-IN',
@@ -100,7 +94,8 @@
 
   function showToast(msg, variant) {
     const el = document.createElement('div');
-    el.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-md shadow-lg border text-sm ' +
+    el.className =
+      'fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-md shadow-lg border text-sm ' +
       (variant === 'destructive'
         ? 'bg-red-50 border-red-200 text-red-700'
         : 'bg-white border-gray-200 text-gray-700');
@@ -111,23 +106,19 @@
 
   /** ---------- lucide icons (minimal subset) ---------- */
   const ICONS = {
-    chevronDown: '<path d="m6 9 6 6 6-6"/>' ,
+    chevronDown: '<path d="m6 9 6 6 6-6"/>',
     trendingDown: '<path d="M22 17l-7.1-7.1a2 2 0 0 0-2.8 0L2 20"/><path d="M22 17V7"/><path d="M22 17H12"/>',
     truck: '<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-5h-3l-2-4h-3v9h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
     inr: '<path d="M6 3h12"/><path d="M6 7h12"/><path d="M6 11h8"/><path d="M10 11c4 0 7 2 7 5v5"/><path d="M6 21h12"/>',
     creditCard: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
     banknote: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/><circle cx="12" cy="12" r="2"/>',
     arrowRight: '<path d="M5 12h14"/><path d="m13 5 7 7-7 7"/>',
-    refreshCw: '<path d="M21 12a9 9 0 0 0-15.5-6.4"/><path d="M3 4v6h6"/><path d="M3 12a9 9 0 0 0 15.5 6.4"/><path d="M21 20v-6h-6"/>',
     zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
     tag: '<path d="M20.59 13.41 12 22 2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><path d="M7 7h.01"/>',
     copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
-    mapPin: '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>' ,
-    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'
-    ,
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     x: '<path d="M18 6 6 18"/><path d="M6 6l12 12"/>'
   };
 
@@ -148,7 +139,7 @@
     const ctx = {};
     const productParam = (params.get('product') || '').toLowerCase();
     if (productParam === 'card') ctx.product = 'card';
-    else if (productParam === 'note') ctx.product = 'note';
+    else if (productParam === 'note' || productParam === 'notes') ctx.product = 'note';
     else if (productParam === 'both') ctx.product = 'both';
 
     const city = (params.get('city') || '').toUpperCase();
@@ -173,49 +164,83 @@
     root.innerHTML = `
       <div class="w-full max-w-[460px] mx-auto">
         <div class="bg-white rounded-md shadow-lg border border-gray-200 overflow-visible relative">
+
+          <!-- Limited offer pill -->
           <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-            <div class="bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md whitespace-nowrap" data-testid="badge-limited">Limited Time Offer</div>
+            <div class="bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+              Limited Time Offer
+            </div>
           </div>
 
+          <!-- Header -->
           <div class="bg-[#093562] px-4 sm:px-5 pt-5 pb-3 rounded-t-md relative">
-            <button type="button" id="fx-close-widget" class="absolute top-3 right-3 rounded-md p-1 text-white opacity-80 hover:opacity-100" aria-label="Close" data-testid="button-close">
-              <span class="sr-only">Close</span>
-              ${svgIcon('x', 'w-4 h-4')}
-            </button>
-            <div class="flex items-center gap-2 pr-10" data-testid="title-with-logo">
-              <img src="./images/bmf-logo.png" alt="BookMyForex" class="h-6 w-auto object-contain" />
-              <h2 class="text-lg font-semibold text-white" data-testid="text-widget-title">Buy Forex Online</h2>
+
+            <!-- Top line: centered logo + close -->
+            <div class="grid grid-cols-3 items-center">
+              <div></div>
+
+              <div class="flex justify-center">
+                <img
+                  src="./images/bmf-logo@3x.png"
+                  alt="BookMyForex"
+                  class="h-8 sm:h-9 w-auto object-contain"
+                />
+              </div>
+
+              <div class="flex justify-end">
+                <button type="button" id="fx-close-widget"
+                  class="rounded-md p-2 text-white opacity-80 hover:opacity-100"
+                  aria-label="Close">
+                  <span class="sr-only">Close</span>
+                  ${svgIcon('x', 'w-4 h-4')}
+                </button>
+              </div>
             </div>
-            <div class="flex items-center justify-between mt-2" data-testid="header-callouts">
-              <div class="flex items-center gap-1">
-                ${svgIcon('trendingDown', 'w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FFB427] flex-shrink-0')}
-                <span class="text-[11px] sm:text-[13px] text-white font-semibold whitespace-nowrap">Best Rates</span>
+
+            <!-- Title -->
+            <div class="mt-2 min-w-0">
+              <h2 class="text-2xl sm:text-3xl font-semibold text-white leading-tight">
+                Buy Forex Online
+              </h2>
+            </div>
+
+            <!-- Persuasion row (responsive) -->
+            <div class="mt-3 grid grid-cols-2 sm:flex sm:flex-wrap gap-x-4 gap-y-2 text-white/95">
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                ${svgIcon('trendingDown', 'w-3.5 h-3.5 text-[#FFB427] flex-shrink-0')}
+                <span class="text-[12px] sm:text-[13px] font-semibold">Best Rates</span>
               </div>
-              <div class="flex items-center gap-1">
-                ${svgIcon('truck', 'w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FFB427] flex-shrink-0')}
-                <span class="text-[11px] sm:text-[13px] text-white font-semibold whitespace-nowrap">Doorstep Delivery</span>
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                ${svgIcon('truck', 'w-3.5 h-3.5 text-[#FFB427] flex-shrink-0')}
+                <span class="text-[12px] sm:text-[13px] font-semibold">Doorstep Delivery</span>
               </div>
-              <div class="flex items-center gap-1">
-                ${svgIcon('inr', 'w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FFB427] flex-shrink-0')}
-                <span class="text-[11px] sm:text-[13px] text-white font-semibold whitespace-nowrap">Pay on Delivery</span>
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                ${svgIcon('inr', 'w-3.5 h-3.5 text-[#FFB427] flex-shrink-0')}
+                <span class="text-[12px] sm:text-[13px] font-semibold">Pay on Delivery</span>
               </div>
             </div>
           </div>
 
+          <!-- Body -->
           <div class="p-4 sm:p-5">
             <form id="fx-form" class="space-y-3 sm:space-y-4">
-              <div id="fx-tabs" class="flex rounded-md border border-gray-300 overflow-hidden" data-testid="tabs-product">
-                <button type="button" id="tab-notes" class="flex-1 py-2.5 text-sm font-medium transition-colors flex items-center justify-center bg-[#093562] text-white" data-testid="tab-notes">
+
+              <!-- Tabs -->
+              <div id="fx-tabs" class="flex rounded-md border border-gray-300 overflow-hidden">
+                <button type="button" id="tab-notes"
+                  class="flex-1 py-2.5 text-sm font-medium transition-colors flex items-center justify-center bg-[#093562] text-white">
                   ${svgIcon('banknote', 'w-4 h-4 mr-1.5 flex-shrink-0')}
                   Currency Notes
                 </button>
-                <button type="button" id="tab-card" class="flex-1 py-2.5 text-sm font-medium transition-colors border-l border-gray-300 flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-100" data-testid="tab-card">
+                <button type="button" id="tab-card"
+                  class="flex-1 py-2.5 text-sm font-medium transition-colors border-l border-gray-300 flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-100">
                   ${svgIcon('creditCard', 'w-4 h-4 mr-1.5 flex-shrink-0')}
                   Forex Card
                 </button>
               </div>
 
-              <div class="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-md px-3 py-2" data-testid="delivery-tat-bar">
+              <!-- Delivery + City -->
+              <div class="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-md px-3 py-2">
                 <div class="flex flex-col min-w-0">
                   <div class="flex items-center gap-2">
                     ${svgIcon('truck', 'w-4 h-4 text-blue-600 flex-shrink-0')}
@@ -224,18 +249,19 @@
                   <div class="text-[10px] text-blue-700 ml-6" data-testid="delivery-tat-sub">...</div>
                 </div>
 
-                <!-- City selector (compact) -->
                 <div class="relative" id="city-selector">
-                  <button type="button" id="city-trigger" class="flex items-center gap-1 text-blue-600 font-semibold text-[12px] sm:text-[13px] hover:text-blue-700 transition-colors flex-shrink-0" data-testid="select-city" aria-expanded="false">
+                  <button type="button" id="city-trigger"
+                    class="flex items-center gap-1 text-blue-600 font-semibold text-[12px] sm:text-[13px] hover:text-blue-700 transition-colors flex-shrink-0"
+                    aria-expanded="false">
                     <span id="city-trigger-label">Select City</span>
                     ${svgIcon('chevronDown', 'w-3.5 h-3.5')}
                   </button>
 
                   <div id="city-popover" class="hidden absolute right-0 mt-2 w-[280px] p-0 rounded-md shadow-lg border border-gray-200 bg-white z-50">
-                    <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
+                    <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-white text-gray-900">
                       <div class="flex items-center border-b px-3" cmdk-input-wrapper="">
                         ${svgIcon('search', 'mr-2 h-4 w-4 shrink-0 opacity-50')}
-                        <input id="city-search" class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" placeholder="Search city..." />
+                        <input id="city-search" class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-400" placeholder="Search city..." />
                       </div>
                       <div id="city-list" class="max-h-[260px] overflow-y-auto overflow-x-hidden"></div>
                     </div>
@@ -243,11 +269,14 @@
                 </div>
               </div>
 
+              <!-- Currency -->
               <div>
                 <label class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 block">Currency</label>
 
                 <div class="relative" id="currency-selector">
-                  <button type="button" id="currency-trigger" class="inline-flex items-center justify-between w-full h-10 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-none font-normal" aria-expanded="false" data-testid="select-currency">
+                  <button type="button" id="currency-trigger"
+                    class="inline-flex items-center justify-between w-full h-10 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-none font-normal"
+                    aria-expanded="false">
                     <span class="flex items-center gap-2" id="currency-trigger-label">
                       <span class="text-gray-400">Select currency...</span>
                     </span>
@@ -255,10 +284,10 @@
                   </button>
 
                   <div id="currency-popover" class="hidden absolute left-0 mt-2 w-full sm:w-[340px] p-0 rounded-md shadow-lg border border-gray-200 bg-white z-50">
-                    <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
+                    <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-white text-gray-900">
                       <div class="flex items-center border-b px-3" cmdk-input-wrapper="">
                         ${svgIcon('search', 'mr-2 h-4 w-4 shrink-0 opacity-50')}
-                        <input id="currency-search" class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" placeholder="Search currency..." />
+                        <input id="currency-search" class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-gray-400" placeholder="Search currency..." />
                       </div>
                       <div id="currency-list" class="max-h-[280px] overflow-y-auto overflow-x-hidden"></div>
                     </div>
@@ -266,28 +295,45 @@
                 </div>
               </div>
 
+              <!-- Amount -->
               <div>
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 block" data-testid="label-amount">AMOUNT (<span id="amount-currency">USD</span>)</label>
-                <div data-testid="amount-row">
-                  <input id="amount-input" type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="11" placeholder="Enter amount" class="w-full h-12 rounded-md bg-white border border-gray-300 text-base font-semibold pl-3 pr-3 focus:outline-none focus:ring-2 focus:ring-[#093562]/30 focus:border-[#093562]" data-testid="input-amount" />
-                  <span id="amount-max" class="hidden text-[11px] text-gray-400 mt-1 block" data-testid="text-max-limit"></span>
+                <label class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5 block">
+                  AMOUNT (<span id="amount-currency">USD</span>)
+                </label>
+                <div>
+                  <input id="amount-input" type="text" inputmode="numeric" pattern="[0-9,]*" maxlength="11" placeholder="Enter amount"
+                    class="w-full h-12 rounded-md bg-white border border-gray-300 text-base font-semibold pl-3 pr-3 focus:outline-none focus:ring-2 focus:ring-[#093562]/30 focus:border-[#093562]" />
+                  <span id="amount-max" class="hidden text-[11px] text-gray-400 mt-1 block"></span>
 
-                  <div id="rate-display" class="hidden flex items-center justify-between mt-2 min-w-0" data-testid="rate-display">
-                    <div class="text-[13px] leading-[18px] text-gray-400" data-testid="text-rate">
+                  <div id="rate-display" class="hidden flex items-center justify-between mt-2 min-w-0">
+                    <div class="text-[13px] leading-[18px] text-gray-400">
                       <span>Rate: </span>
                       <span id="rate-text" class="text-gray-600">₹0.00/USD</span>
                     </div>
-                    <div class="flex items-baseline gap-1.5" data-testid="text-converted-amount">
+                    <div class="flex items-baseline gap-1.5">
                       <span class="text-[13px] font-bold text-[#093562] flex-shrink-0">Total:</span>
-                      <span id="total-text" class="text-[20px] font-extrabold text-[#093562] whitespace-nowrap" data-testid="text-total-value">₹0</span>
+                      <span id="total-text" class="text-[20px] font-extrabold text-[#093562] whitespace-nowrap">₹0</span>
+                    </div>
+                  </div>
+
+                  <!-- Best Rate Guarantee (below forex rate) -->
+                  <div id="brg-panel" class="hidden mt-2 rounded-md border border-sky-100 bg-gradient-to-r from-sky-50 to-white px-3 py-2">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="flex items-start gap-2 min-w-0">
+                        <span class="mt-0.5 text-sky-700 flex-shrink-0">${svgIcon('shield','w-4 h-4','')}</span>
+                        <div class="min-w-0">
+                          <div class="text-[13px] font-semibold text-slate-800">Best Rate Guarantee</div>
+                          <div class="text-[12px] text-slate-600">Found a better rate? Get <b>2X cashback</b> on the difference.</div>
+                        </div>
+                      </div>
+                      <a href="#" class="text-[12px] font-semibold text-sky-700 whitespace-nowrap">Know more</a>
                     </div>
                   </div>
                 </div>
               </div>
 
-              
-
-              <div id="coupon-banner" class="hidden flex flex-col min-[420px]:flex-row min-[420px]:items-center gap-2 justify-between bg-emerald-50 border border-emerald-200 border-dashed rounded-md px-3 py-2" data-testid="coupon-banner">
+              <!-- Coupon -->
+              <div id="coupon-banner" class="hidden flex flex-col min-[420px]:flex-row min-[420px]:items-center gap-2 justify-between bg-emerald-50 border border-emerald-200 border-dashed rounded-md px-3 py-2">
                 <div class="flex items-start gap-2 min-w-0">
                   <span class="mt-0.5 text-emerald-700 flex-shrink-0">${svgIcon('tag','w-4 h-4','')}</span>
                   <div class="min-w-0">
@@ -295,51 +341,50 @@
                     <div class="text-[12px] text-emerald-700" id="coupon-subtitle">Discount applied on checkout</div>
                   </div>
                 </div>
-                <button type="button" id="coupon-copy-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-100 border border-emerald-200 px-3 py-2 text-[12px] font-semibold text-emerald-800 hover:bg-emerald-200/40 whitespace-nowrap" data-testid="coupon-copy">
+                <button type="button" id="coupon-copy-btn"
+                  class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-100 border border-emerald-200 px-3 py-2 text-[12px] font-semibold text-emerald-800 hover:bg-emerald-200/40 whitespace-nowrap">
                   ${svgIcon('copy','w-4 h-4','')}
                   <span id="coupon-copy-text">Copy Code</span>
                 </button>
               </div>
 
-              <div id="savings-banner" class="hidden flex items-center gap-2 bg-green-50 border border-green-200 rounded-md px-3 py-2" data-testid="savings-banner">
+              <!-- Savings -->
+              <div id="savings-banner" class="hidden flex items-center gap-2 bg-green-50 border border-green-200 rounded-md px-3 py-2">
                 ${svgIcon('trendingDown', 'w-4 h-4 text-green-600 flex-shrink-0')}
-                <span class="text-xs text-green-700 font-medium">You save upto <span class="font-bold" id="savings-text">₹0</span> vs banks & airports</span>
+                <span class="text-xs text-green-700 font-medium">
+                  You save up to <span class="font-bold" id="savings-text">₹0</span> vs other banks & airports
+                </span>
               </div>
 
+              <!-- CTAs -->
               <div class="space-y-2">
                 <div class="flex flex-col gap-3 items-stretch">
-                  <button type="submit" id="submit-btn" class="w-full h-11 rounded-md text-[14px] font-bold bg-[#FFB427] hover:bg-[#e6a223] text-white uppercase tracking-wider border-0 shadow-none ring-0 outline-none focus:ring-0 focus-visible:ring-0 whitespace-nowrap flex items-center justify-center gap-2 flex-nowrap px-3" data-testid="button-submit">
+                  <button type="submit" id="submit-btn"
+                    class="w-full h-11 rounded-md text-[14px] font-bold bg-[#FFB427] hover:bg-[#e6a223] text-white uppercase tracking-wider border-0 shadow-none whitespace-nowrap flex items-center justify-center gap-2 flex-nowrap px-3">
                     <span>Book This Order</span>
                     ${svgIcon('arrowRight', 'w-4 h-4 shrink-0')}
                   </button>
 
-                  <a id="wa-btn" href="#" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp" class="w-full h-11 rounded-md flex items-center justify-center gap-2 text-[14px] font-semibold text-[#25D366] border border-[#25D366]/40 hover:bg-[#25D366]/5 transition-colors" data-testid="button-whatsapp">
+                  <a id="wa-btn" href="#" target="_blank" rel="noopener noreferrer"
+                    class="w-full h-11 rounded-md flex items-center justify-center gap-2 text-[14px] font-semibold text-[#25D366] border border-[#25D366]/40 hover:bg-[#25D366]/5 transition-colors">
                     <img src="./assets/whatsapp.png" alt="" class="w-5 h-5 flex-shrink-0" />
                     <span class="whitespace-nowrap">Forex on WhatsApp</span>
                   </a>
                 </div>
 
-                <div class="flex items-center justify-center gap-2 sm:gap-3 pt-0.5" data-testid="trust-badges">
+                <div class="flex items-center justify-center gap-2 sm:gap-3 pt-0.5">
                   <div class="flex items-center gap-1 flex-shrink-0">
                     ${svgIcon('zap', 'w-3 h-3 text-[#FFB427] flex-shrink-0')}
                     <span class="text-[9px] sm:text-[10px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Zero Forex Markup</span>
                   </div>
                   <div class="w-px h-3 bg-gray-300 flex-shrink-0"></div>
-                  <div class="flex items-center gap-1 min-w-0" data-testid="persuasion-text">
+                  <div class="flex items-center gap-1 min-w-0">
                     ${svgIcon('shield', 'w-3 h-3 text-green-500 flex-shrink-0')}
                     <span id="persuasion-text" class="text-[9px] sm:text-[10px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap truncate">RBI Authorized Dealers</span>
                   </div>
                 </div>
               </div>
 
-              <div class="bg-orange-50 border border-orange-200 rounded-md px-3 py-2 text-center" data-testid="urgency-banner">
-                <span class="text-[11px] text-orange-700 font-medium">Rate locked for <span id="countdown" class="font-bold font-mono">14:59</span> min - Book now before it changes!</span>
-              </div>
-
-              <div class="flex items-center justify-center gap-1.5 text-[11px] text-gray-400" data-testid="text-last-updated">
-                ${svgIcon('clock', 'w-3 h-3')}
-                <span>Live rates updated <span id="last-updated">...</span></span>
-              </div>
             </form>
           </div>
         </div>
@@ -353,25 +398,30 @@
 
     renderBase(root);
 
-    // ---------- close behavior (X button, click outside, Esc key) ----------
+    // ---------- close behavior ----------
     const overlayEl = document.getElementById('fx-page-overlay');
     const closeBtn = $('#fx-close-widget', root);
 
+    // Track intervals so close doesn't leave timers running
+    const intervalIds = [];
+    function safeSetInterval(fn, ms) {
+      const id = setInterval(fn, ms);
+      intervalIds.push(id);
+      return id;
+    }
+    function clearAllIntervals() {
+      while (intervalIds.length) clearInterval(intervalIds.pop());
+    }
+
     function localClose() {
-      // Hide wrapper (if present) and clear widget root
       if (overlayEl) overlayEl.style.display = 'none';
       root.innerHTML = '';
+      clearAllIntervals();
     }
 
     function emitClose() {
-      try {
-        window.dispatchEvent(new CustomEvent('fxWidget:close'));
-      } catch (_) {}
-
-      // Close inside this document (useful for full-page demo and widget.html)
+      try { window.dispatchEvent(new CustomEvent('fxWidget:close')); } catch (_) {}
       localClose();
-
-      // Notify parent if this widget is inside an iframe popup
       try {
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ type: 'FXW_CLOSE' }, '*');
@@ -380,14 +430,11 @@
     }
 
     if (closeBtn) closeBtn.addEventListener('click', emitClose);
-
     if (overlayEl) {
       overlayEl.addEventListener('click', (e) => {
-        // Close only when clicking the overlay area (outside the widget)
         if (e.target === overlayEl) emitClose();
       });
     }
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') emitClose();
     });
@@ -406,12 +453,10 @@
     let currency = (ctx.currency || 'USD').toUpperCase();
     let amount = 1000;
 
-    // coupon simulation (static-only)
     let couponCode = (ctx.coupon || '').toUpperCase();
     let cashbackAmount = Number(ctx.cashback || 0);
     let rateOldOverride = Number(ctx.rateOld || 0);
 
-    // rates: base rates list; we simulate slight city variation
     const baseRateByCurrency = new Map();
     (ratesData.rates || []).forEach(r => baseRateByCurrency.set(r.currency, r));
 
@@ -421,11 +466,7 @@
       const cityNudge = ((hashCode(city) % 9) - 4) * 0.05; // -0.20..+0.20
       const cardRate = Math.max(0, r.cardRate + cityNudge);
       const notesRate = Math.max(0, r.notesRate + cityNudge);
-      return {
-        ...r,
-        cardRate,
-        notesRate,
-      };
+      return { ...r, cardRate, notesRate };
     }
 
     function getServiceableCities() {
@@ -473,15 +514,19 @@
     const rateText = $('#rate-text', root);
     const totalText = $('#total-text', root);
 
+    const brgPanel = $('#brg-panel', root);
+
     const savingsBanner = $('#savings-banner', root);
     const savingsText = $('#savings-text', root);
-
 
     const couponBanner = $('#coupon-banner', root);
     const couponTitle = $('#coupon-title', root);
     const couponSubtitle = $('#coupon-subtitle', root);
     const couponCopyBtn = $('#coupon-copy-btn', root);
     const couponCopyText = $('#coupon-copy-text', root);
+
+    const persuasionText = $('#persuasion-text', root);
+    const waBtn = $('#wa-btn', root);
 
     if (couponCopyBtn) {
       couponCopyBtn.addEventListener('click', async () => {
@@ -491,7 +536,6 @@
           if (couponCopyText) couponCopyText.textContent = 'Copied';
           setTimeout(() => { if (couponCopyText) couponCopyText.textContent = 'Copy Code'; }, 1500);
         } catch (e) {
-          // fallback
           try {
             const ta = document.createElement('textarea');
             ta.value = couponCode;
@@ -509,18 +553,10 @@
       });
     }
 
-    const persuasionText = $('#persuasion-text', root);
-
-    const countdownEl = $('#countdown', root);
-    const lastUpdatedEl = $('#last-updated', root);
-
-    const waBtn = $('#wa-btn', root);
-
     // ---------- init visibility based on context ----------
     if (!showBoth) {
-      // replace tabs with static label like React does
       tabsWrap.outerHTML = `
-        <div class="flex items-center justify-center gap-2 bg-[#093562] text-white rounded-md py-2.5 text-sm font-medium" data-testid="tabs-product">
+        <div class="flex items-center justify-center gap-2 bg-[#093562] text-white rounded-md py-2.5 text-sm font-medium">
           ${showOnlyCard
             ? `${svgIcon('creditCard', 'w-4 h-4 flex-shrink-0')} Forex Card`
             : `${svgIcon('banknote', 'w-4 h-4 flex-shrink-0')} Currency Notes`
@@ -577,45 +613,32 @@
       const margin = 10;
       const rect = trigger.getBoundingClientRect();
 
-      // Fixed positioning prevents clipping inside the widget container.
       popover.style.position = 'fixed';
       popover.style.zIndex = '99999';
       popover.style.right = 'auto';
       popover.style.bottom = '';
       popover.style.marginTop = '0';
 
-      // Width
       let width;
-      if (mode === 'city') {
-        width = Math.min(280, vp.width - margin * 2);
-      } else {
-        // match trigger width on both mweb & dweb
-        width = Math.min(rect.width, vp.width - margin * 2);
-      }
+      if (mode === 'city') width = Math.min(280, vp.width - margin * 2);
+      else width = Math.min(rect.width, vp.width - margin * 2);
       popover.style.width = width + 'px';
 
-      // Horizontal position
       let left = (mode === 'city') ? (rect.right - width) : rect.left;
       left = clamp(left, margin, vp.width - width - margin);
       popover.style.left = (left + vp.left) + 'px';
 
-      // Available space within the *visible* viewport (handles mobile keyboard)
       const visibleTop = vp.top;
       const visibleBottom = vp.top + vp.height;
       const below = visibleBottom - rect.bottom;
       const above = rect.top - visibleTop;
 
-      // Choose direction: prefer below unless keyboard/space makes it cramped
-      const preferAbove = (below < 220 && above > below);
-      const placeAbove = preferAbove;
-
+      const placeAbove = (below < 220 && above > below);
       const maxH = Math.max(180, Math.floor((placeAbove ? above : below) - gap - margin));
       popover.style.maxHeight = maxH + 'px';
       popover.style.overflow = 'hidden';
 
-      // Apply scroll constraints to the list inside popover
       if (listEl) {
-        // header is the search row (approx 44px)
         const headerEl = popover.querySelector('[cmdk-input-wrapper]') || popover.querySelector('.border-b');
         const headerH = headerEl ? headerEl.getBoundingClientRect().height : 44;
         const listMax = Math.max(140, Math.floor(maxH - headerH - 8));
@@ -627,7 +650,6 @@
         listEl.style.touchAction = 'pan-y';
       }
 
-      // Vertical position
       let top;
       if (!placeAbove) {
         top = rect.bottom + gap;
@@ -644,12 +666,7 @@
       closeAllPopovers();
       popover.classList.remove('hidden');
       trigger.setAttribute('aria-expanded', 'true');
-
-      // Render/measure then position
-      requestAnimationFrame(() => {
-        positionPopover(popover, trigger, listEl, mode);
-      });
-
+      requestAnimationFrame(() => positionPopover(popover, trigger, listEl, mode));
       activePopover = { popover, trigger, listEl, mode };
       setTimeout(() => { focusEl && focusEl.focus(); }, 0);
     }
@@ -662,7 +679,6 @@
 
     function repositionActivePopover() {
       if (!activePopover) return;
-      // if it got closed somehow
       if (activePopover.popover.classList.contains('hidden')) { activePopover = null; return; }
       positionPopover(activePopover.popover, activePopover.trigger, activePopover.listEl, activePopover.mode);
     }
@@ -727,7 +743,6 @@
 
       cityList.innerHTML = group('Top Cities', topFiltered, false) + group('Other Cities', otherFiltered, topFiltered.length > 0);
 
-      // bind clicks
       $$('[data-code]', cityList).forEach(row => {
         row.addEventListener('click', () => {
           city = row.getAttribute('data-code');
@@ -748,17 +763,13 @@
     function renderCurrencyList() {
       const query = (currencySearch.value || '').toLowerCase().trim();
 
-      // only show currencies that exist in rates
       const availableCodes = new Set(Array.from(baseRateByCurrency.keys()));
       const all = currencies.filter(c => availableCodes.has(c.code));
 
       const popular = all.filter(c => c.popular);
       const other = all.filter(c => !c.popular);
 
-      const filtered = query
-        ? all.filter(c => currencyFuzzyMatch(c, query))
-        : null;
-
+      const filtered = query ? all.filter(c => currencyFuzzyMatch(c, query)) : null;
       const list = filtered || null;
 
       if (list && !list.length) {
@@ -771,7 +782,6 @@
         const img = r && r.image ? `<img src="${escapeHtml(r.image)}" alt="" class="w-5 h-3.5 object-cover rounded-sm border border-gray-200" />` : '';
         const isSel = meta.code === currency;
         const right = meta.rightLabel ? `<span class="ml-auto text-[11px] text-gray-400 whitespace-nowrap">${escapeHtml(meta.rightLabel)}</span>` : '';
-
         return `
           <div class="relative flex cursor-pointer gap-2 select-none items-center rounded-sm px-2 py-2 text-sm hover:bg-gray-50" data-code="${meta.code}">
             <span class="mr-2 h-3.5 w-3.5 text-[#009688] ${isSel ? 'opacity-100' : 'opacity-0'}">${svgIcon('check','h-3.5 w-3.5','')}</span>
@@ -796,7 +806,6 @@
       if (query) {
         currencyList.innerHTML = group('Search Results', list, false);
       } else {
-        // Keep popular at top, and show others (sorted by name) below
         const otherSorted = [...other].sort((a, b) => a.name.localeCompare(b.name));
         currencyList.innerHTML = group('Popular Currencies', popular, false) + group('All Currencies', otherSorted, popular.length > 0);
       }
@@ -839,13 +848,14 @@
         currencyTriggerLabel.innerHTML = `<span class="text-gray-400">Select currency...</span>`;
       } else {
         const img = rate && rate.image ? `<img src="${escapeHtml(rate.image)}" alt="" class="w-5 h-3.5 object-cover rounded-sm border border-gray-200" />` : '';
+        // Selected shows code + name
         currencyTriggerLabel.innerHTML = `${img}<span class="font-semibold">${escapeHtml(meta.code)}</span><span class="text-gray-600">${escapeHtml(meta.name)}</span>`;
       }
 
       amountCurrency.textContent = currency;
 
       persuasionText.textContent = (product === 'card')
-        ? ( {
+        ? ({
             USD: 'Start with just 10 USD',
             AED: 'Start with just 40 AED',
             THB: 'Start with just 350 THB',
@@ -860,17 +870,15 @@
             AUD: 'Start with just 15 AUD',
             JPY: 'Start with just 10,000 JPY',
             NZD: 'Start with just 15 NZD',
-          }[currency] || '' )
+          }[currency] || '')
         : 'RBI Authorized Dealers';
 
-      // ensure search list updates checkmarks
       renderCityList();
       renderCurrencyList();
     }
 
     function updateAmountUI() {
       const MAX = 9999999;
-      // amount input formatting (en-IN)
       amountInput.value = amount ? Number(amount).toLocaleString('en-IN') : '';
 
       if (amount > MAX) {
@@ -886,15 +894,19 @@
       if (amount && activeRate > 0) {
         const total = Number(amount) * activeRate;
         const formatted = fmtINR(total);
+
         rateDisplay.classList.remove('hidden');
         if (couponCode) {
           const oldRate = rateOldOverride > 0 ? rateOldOverride : (activeRate + 0.10);
-          rateText.innerHTML = `<span class=\"line-through mr-2 text-gray-400\">₹${oldRate.toFixed(2)}/${currency}</span><span class=\"text-gray-600\">₹${activeRate.toFixed(2)}/${currency}</span>`;
+          rateText.innerHTML = `<span class="line-through mr-2 text-gray-400">₹${oldRate.toFixed(2)}/${currency}</span><span class="text-gray-600">₹${activeRate.toFixed(2)}/${currency}</span>`;
         } else {
           rateText.innerHTML = `₹${activeRate.toFixed(2)}/${currency}`;
         }
         totalText.textContent = formatted.display;
         totalText.title = formatted.full;
+
+        // BRG below rate
+        if (brgPanel) brgPanel.classList.remove('hidden');
 
         // coupon banner
         if (couponBanner) {
@@ -918,24 +930,15 @@
         }
       } else {
         rateDisplay.classList.add('hidden');
+        if (brgPanel) brgPanel.classList.add('hidden');
         savingsBanner.classList.add('hidden');
         if (couponBanner) couponBanner.classList.add('hidden');
       }
 
-      // whatsapp deeplink
       const cityObj = cities.find(c => c.code === city);
       const cityName = cityObj ? cityObj.name : city;
       const msg = `Hi, I want to buy ${amount ? Number(amount).toLocaleString('en-IN') : ''} ${currency} ${product === 'card' ? 'Forex Card' : 'Currency Notes'} in ${cityName}. Please share the best rate.`;
       waBtn.href = `https://wa.me/919212219191?text=${encodeURIComponent(msg)}`;
-    }
-
-    function updateLastUpdated() {
-      try {
-        const dt = ratesData.lastUpdated ? new Date(ratesData.lastUpdated) : new Date();
-        lastUpdatedEl.textContent = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } catch {
-        lastUpdatedEl.textContent = '...';
-      }
     }
 
     function updateAll() {
@@ -945,19 +948,12 @@
       updateTatUI();
       updateSelectorsUI();
       updateAmountUI();
-      updateLastUpdated();
     }
 
     // ---------- event bindings ----------
     if (showBoth) {
-      tabNotes.addEventListener('click', () => {
-        product = 'note';
-        updateAll();
-      });
-      tabCard.addEventListener('click', () => {
-        product = 'card';
-        updateAll();
-      });
+      tabNotes.addEventListener('click', () => { product = 'note'; updateAll(); });
+      tabCard.addEventListener('click', () => { product = 'card'; updateAll(); });
     }
 
     cityTrigger.addEventListener('click', (e) => {
@@ -965,7 +961,6 @@
       togglePopover(cityPopover, cityTrigger, citySearch, cityList, 'city');
       renderCityList();
     });
-
     citySearch.addEventListener('input', renderCityList);
 
     currencyTrigger.addEventListener('click', (e) => {
@@ -973,18 +968,12 @@
       togglePopover(currencyPopover, currencyTrigger, currencySearch, currencyList, 'currency');
       renderCurrencyList();
     });
-
     currencySearch.addEventListener('input', renderCurrencyList);
 
     amountInput.addEventListener('input', () => {
       const raw = amountInput.value.replace(/[^0-9]/g, '');
-      if (!raw) {
-        amount = 0;
-        updateAmountUI();
-        return;
-      }
-      const num = Math.min(Number(raw), 9999999);
-      amount = num;
+      if (!raw) { amount = 0; updateAmountUI(); return; }
+      amount = Math.min(Number(raw), 9999999);
       updateAmountUI();
     });
 
@@ -996,34 +985,16 @@
         showToast('Please select currency and enter amount.', 'destructive');
         return;
       }
-      // Static demo behaviour:
       showToast('Static demo: wire this button to your lead API.', 'default');
     });
 
-    // ---------- countdown ----------
-    let mm = 14;
-    let ss = 59;
-    setInterval(() => {
-      if (ss === 0) {
-        if (mm === 0) mm = 14;
-        else mm -= 1;
-        ss = 59;
-      } else {
-        ss -= 1;
-      }
-      countdownEl.textContent = `${pad2(mm)}:${pad2(ss)}`;
-    }, 1000);
-
     // keep TAT fresh every minute
-    setInterval(updateTatUI, 60000);
+    safeSetInterval(updateTatUI, 60000);
 
     // ---------- initial ----------
     ensureServiceableCity();
     ensureCurrencyExists();
-
-    // set initial amount
     amountInput.value = Number(amount).toLocaleString('en-IN');
-
     updateAll();
   }
 
@@ -1039,7 +1010,9 @@
       console.error(e);
       const root = document.getElementById(ROOT_ID);
       if (root) {
-        root.innerHTML = `<div class="bg-white rounded-md border border-gray-200 p-4 text-sm text-red-600">Failed to load widget data. Ensure this is served via a web server (e.g., GitHub Pages) and that ./data/*.json exist.</div>`;
+        root.innerHTML = `<div class="bg-white rounded-md border border-gray-200 p-4 text-sm text-red-600">
+          Failed to load widget data. Ensure this is served via a web server (e.g., GitHub Pages) and that ./data/*.json exist.
+        </div>`;
       }
     }
   }
