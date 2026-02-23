@@ -182,10 +182,40 @@
               <span class="sr-only">Close</span>
               ${svgIcon('x', 'w-4 h-4')}
             </button>
-            <div class="flex items-center gap-2 pr-10" data-testid="title-with-logo">
-              <img src="./images/bmf-logo.png" alt="BookMyForex" class="h-6 w-auto object-contain" />
-              <h2 class="text-lg font-semibold text-white" data-testid="text-widget-title">Buy Forex Online</h2>
-            </div>
+            <div class="space-y-2" data-testid="header-top">
+  <!-- Top line: centered logo + close on right -->
+  <div class="grid grid-cols-3 items-center" data-testid="header-topline">
+    <div></div>
+
+    <div class="flex justify-center">
+      <img
+        src="./images/bmf-logo.png"
+        alt="BookMyForex"
+        class="h-8 sm:h-9 w-auto object-contain"
+      />
+    </div>
+
+    <div class="flex justify-end">
+      <button type="button" id="fx-close-widget"
+        class="rounded-md p-2 text-white opacity-80 hover:opacity-100"
+        aria-label="Close" data-testid="button-close">
+        <span class="sr-only">Close</span>
+        ${svgIcon('x', 'w-4 h-4')}
+      </button>
+    </div>
+  </div>
+
+  <!-- Title line -->
+  <div class="min-w-0">
+    <h2 class="fx-header-title text-2xl font-semibold text-white leading-tight" data-testid="text-widget-title">
+      Buy Forex Online
+    </h2>
+    <div class="mt-1 inline-flex items-center bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm whitespace-nowrap"
+      data-testid="badge-limited">
+      Limited Time Offer
+    </div>
+  </div>
+</div>
             <div class="flex items-center justify-between mt-2" data-testid="header-callouts">
               <div class="flex items-center gap-1">
                 ${svgIcon('trendingDown', 'w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FFB427] flex-shrink-0')}
