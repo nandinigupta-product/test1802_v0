@@ -361,14 +361,6 @@
                   </div>
                 </div>
               </div>
-
-              <div class="bg-orange-50 border border-orange-200 rounded-md px-3 py-2 text-center" data-testid="urgency-banner">
-                <span class="text-[11px] text-orange-700 font-medium">Rate locked for <span id="countdown" class="font-bold font-mono">14:59</span> min - Book now before it changes!</span>
-              </div>
-
-              <div class="flex items-center justify-center gap-1.5 text-[11px] text-gray-400" data-testid="text-last-updated">
-                ${svgIcon('clock', 'w-3 h-3')}
-                <span>Live rates updated <span id="last-updated">...</span></span>
               </div>
             </form>
           </div>
